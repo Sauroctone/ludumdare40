@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class HumanDeath : MonoBehaviour {
 
-	void Die ()
-	{
-		print ("ded human");
-		Destroy (gameObject);
-	}
-
 	void OnCollisionEnter (Collision col)
 	{
 		if (col.gameObject.tag == "Furniture") 
@@ -18,9 +12,16 @@ public class HumanDeath : MonoBehaviour {
 
 			if (mimic != null && mimic.GetComponent<MimicController>().isLunging)
 			{
-				print ("ded human");
-				Destroy (gameObject);
+				Die ();
 			}
 		}
+	}
+
+	void Die ()
+	{
+		RoundManager manager = Camera.main.GetComponent<RoundManager> ();
+		manager.round = Rounds.End;
+		manager.winner = Winner.Mimics;
+		Destroy (gameObject);
 	}
 }

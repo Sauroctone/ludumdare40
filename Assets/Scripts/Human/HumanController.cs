@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class HumanController : MonoBehaviour {
 
@@ -19,6 +20,11 @@ public class HumanController : MonoBehaviour {
 
 	public LayerMask destinationLayer;
 
+	public ArrowUI hud;
+	public Slider reloadSlider;
+	public GameObject projector;
+	GameObject projInstance;
+
 	void Start ()
 	{
 		navMesh = GetComponent<NavMeshAgent> ();
@@ -26,6 +32,8 @@ public class HumanController : MonoBehaviour {
 
 	void Update()
 	{
+		//print (transform.position);
+
 		if (Input.GetMouseButtonDown (0))
 		{
 			SetDestination ();
@@ -45,6 +53,11 @@ public class HumanController : MonoBehaviour {
 		if (Physics.Raycast (ray, out hit, 1000, destinationLayer)) 
 		{
 			navMesh.SetDestination (hit.point);
+
+			if (projInstance != null)
+				Destroy (projInstance);
+			
+			projInstance = GameObject.Instantiate (projector, new Vector3(hit.point.x, projector.transform.position.y, hit.point.z), projector.transform.rotation) as GameObject;
 		}
 	}
 
@@ -61,17 +74,20 @@ public class HumanController : MonoBehaviour {
 				
 			bulletInst = GameObject.Instantiate (bulletPrefab, bulletSpawner.position, bulletSpawner.rotation) as GameObject;
 			bulletInst.GetComponent<Rigidbody> ().AddForce (bulletInst.transform.forward * bulletSpeed, ForceMode.Impulse);
+			bulletInst.GetComponent<BulletBehaviour> ().human = GetComponent<HumanController> ();
 
 			ammo--;
-			if (ammo > 0)
-				StartCoroutine (Reload ());
+			StartCoroutine (Reload ());
+			StartCoroutine (hud.UpdateArrows ());
 		}
 	}
 
 	IEnumerator Reload ()
 	{
 		canShoot = false;
+		reloadSlider.gameObject.SetActive (true);
 		yield return new WaitForSeconds (reloadTime);
+		reloadSlider.gameObject.SetActive (false);
 		canShoot = true;
 	}
 }

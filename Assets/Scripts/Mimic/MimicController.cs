@@ -54,6 +54,7 @@ public class MimicController : MonoBehaviour {
 	void FixedUpdate()
 	{
 		rb.velocity = Vector3.Lerp(rb.velocity, new Vector3 (direction.x, rb.velocity.y, direction.z).normalized * speed, lerpMov);
+		//print (direction);
 	}
 
 	void GetIsometricInput()
@@ -146,19 +147,21 @@ public class MimicController : MonoBehaviour {
 				tappedOnce = false;
 				StopCoroutine (LungeBuffer());
 				StartCoroutine (Lunge ());
+				isLunging = true;
 			}
 		}
 	}
 
 	IEnumerator Lunge ()
 	{
-		isLunging = true;
-		rb.velocity = Vector3.zero;
 
+		isLunging = true;
+		yield return null;
+
+		rb.velocity = Vector3.zero;
 		human = GameObject.FindGameObjectWithTag ("Human");
-		direction = human.transform.position;
+		direction = (human.transform.position - transform.parent.position).normalized;
 		speed = lungeSpeed;
-		print ("lunge!");
 		yield return new WaitForSeconds (lungeTime);
 
 		speed = 0f;

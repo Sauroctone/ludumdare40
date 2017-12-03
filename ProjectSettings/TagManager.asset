@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Furniture
   - Human
+  - BottomWall
   layers:
   - Default
   - TransparentFX
