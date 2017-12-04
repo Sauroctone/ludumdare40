@@ -123,3 +123,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7eb22fcc6809fb449ad00d872225d70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  human: {fileID: 0}
+  splatter: {fileID: 1883581987433938, guid: 5be34a7315c09b941aa4c20a375b081d, type: 2}
+  hitWood: {fileID: 8300000, guid: a4f0b11175ba32442a404a5018f0915f, type: 3}
+  hitMimic: {fileID: 8300000, guid: 53efc987e395b894e8b31a0a19d6a018, type: 3}
+  boltRecup: {fileID: 8300000, guid: 4c680be8d2b7852438d36c062a73af7d, type: 3}

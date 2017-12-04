@@ -29,10 +29,20 @@ public class MimicController : MonoBehaviour {
 
 	public float bufferTime;
 
+	AudioSource source;
+	//public AudioClip lunge;
+
+	public Animator anim;
+	Collider col;
+
 	void Start ()
 	{
 		rb = GetComponentInParent<Rigidbody> ();
+		source = GetComponent<AudioSource> ();
 		speed = moveSpeed;
+		human = GameObject.FindGameObjectWithTag ("Human");
+		anim = GetComponentInParent <Animator> ();
+		col = GetComponentInParent <Collider> ();
 	}
 
 	void Update () 
@@ -40,20 +50,28 @@ public class MimicController : MonoBehaviour {
 		if (!isLunging) 
 		{
 			GetIsometricInput ();
-			CheckLungeInput ();
+			if (human != null)
+				CheckLungeInput ();
 
 			direction = new Vector3 (xAxis, 0f, zAxis);
 		}
 
-		if (direction != Vector3.zero)
-			playerRot = Quaternion.LookRotation (direction);
 
+		if (direction != Vector3.zero) 
+		{
+			playerRot = Quaternion.LookRotation (direction);
+		}
+			
 		transform.parent.rotation = Quaternion.Slerp (transform.parent.rotation, playerRot, rotSpeed * Time.deltaTime);
+
 	}
 		
 	void FixedUpdate()
 	{
-		rb.velocity = Vector3.Lerp(rb.velocity, new Vector3 (direction.x, rb.velocity.y, direction.z).normalized * speed, lerpMov);
+		direction = direction.normalized * speed;
+		direction.y = rb.velocity.y;
+
+		rb.velocity = Vector3.Lerp(rb.velocity, direction, lerpMov);
 		//print (direction);
 	}
 
@@ -159,9 +177,14 @@ public class MimicController : MonoBehaviour {
 		yield return null;
 
 		rb.velocity = Vector3.zero;
-		human = GameObject.FindGameObjectWithTag ("Human");
-		direction = (human.transform.position - transform.parent.position).normalized;
+		direction = (human.transform.position - transform.parent.position);
 		speed = lungeSpeed;
+
+		anim.SetTrigger ("lunges");
+
+		source.pitch = Random.Range (0.8f, 1.2f);
+		source.Play ();
+
 		yield return new WaitForSeconds (lungeTime);
 
 		speed = 0f;
@@ -180,5 +203,13 @@ public class MimicController : MonoBehaviour {
 		yield return new WaitForSeconds (bufferTime);
 		isBuffering = false;
 		tappedOnce = false;
+	}
+
+	public void Die()
+	{
+		col.material = null;
+		rb.mass = 1;
+		anim.SetTrigger ("dies");
+		Destroy (gameObject);
 	}
 }

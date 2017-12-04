@@ -9,10 +9,17 @@ public class BulletBehaviour : MonoBehaviour {
 
 	Rigidbody rb;
 	public HumanController human;
+	public GameObject splatter;
+
+	AudioSource source;
+	public AudioClip hitWood;
+	public AudioClip hitMimic;
+	public AudioClip boltRecup;
 
 	void Start()
 	{
 		rb = GetComponent<Rigidbody> ();
+		source = GameObject.Find ("SoundManager").GetComponent<AudioSource>();
 	}
 
 	void Update () 
@@ -40,10 +47,15 @@ public class BulletBehaviour : MonoBehaviour {
 
 				if (mimic != null) 
 				{
-					//tache de sang
-					//changer son mesh
-					MimicManager mimics = Camera.main.GetComponent<MimicManager>();
-					mimics.mimicList.Remove(mimic.gameObject);
+					ScreenShakeGenerator shake = Camera.main.GetComponent<ScreenShakeGenerator> ();
+					shake.ShakeScreen (0.2f, 0.2f);
+
+					source.PlayOneShot (hitMimic);
+
+					GameObject.Instantiate (splatter, new Vector3 (mimic.position.x, 0.01f, mimic.position.z), mimic.rotation);
+
+					MimicManager mimics = Camera.main.GetComponent<MimicManager> ();
+					mimics.mimicList.Remove (mimic.gameObject);
 
 					if (mimics.mimicList.Count == 0) 
 					{
@@ -52,15 +64,18 @@ public class BulletBehaviour : MonoBehaviour {
 						manager.winner = Winner.Human;
 					}
 
-					Destroy (mimic.gameObject);
-					print ("ded mimic");
+					mimic.GetComponent<MimicController> ().Die ();
 
 					if (human.ammo < 3) 
 					{
 						human.ammo++;
+						//source.PlayDelayed (boltRecup, 0.5f);
 						StartCoroutine (human.hud.UpdateArrows ());
 					}
-				}
+				} 
+
+				else
+					source.PlayOneShot (hitWood);
 			}
 
 			Destroy (gameObject.GetComponent<BulletBehaviour> ());

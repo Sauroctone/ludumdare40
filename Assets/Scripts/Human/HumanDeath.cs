@@ -19,6 +19,8 @@ public class HumanDeath : MonoBehaviour {
 
 	void Die ()
 	{
+		ScreenShakeGenerator shake = Camera.main.GetComponent<ScreenShakeGenerator> ();
+		shake.ShakeScreen (0.2f, 0.2f);
 		RoundManager manager = Camera.main.GetComponent<RoundManager> ();
 		manager.round = Rounds.End;
 		manager.winner = Winner.Mimics;

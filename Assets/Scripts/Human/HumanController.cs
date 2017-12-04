@@ -25,6 +25,13 @@ public class HumanController : MonoBehaviour {
 	public GameObject projector;
 	GameObject projInstance;
 
+	public AudioSource source;
+	public AudioClip shoot;
+	public AudioClip reload;
+
+	public Animator anim;
+	int frameSincePath;
+
 	void Start ()
 	{
 		navMesh = GetComponent<NavMeshAgent> ();
@@ -32,8 +39,6 @@ public class HumanController : MonoBehaviour {
 
 	void Update()
 	{
-		//print (transform.position);
-
 		if (Input.GetMouseButtonDown (0))
 		{
 			SetDestination ();
@@ -43,6 +48,15 @@ public class HumanController : MonoBehaviour {
 		{
 			Shoot ();
 		}
+
+		if (frameSincePath > 0 && anim.GetBool ("isMoving") && !navMesh.hasPath) 
+		{
+			anim.SetBool ("isMoving", false);
+			frameSincePath = 0;
+		}
+
+		if (anim.GetBool ("isMoving") && frameSincePath < 1)
+			frameSincePath++;
 	}
 
 	void SetDestination()
@@ -53,6 +67,7 @@ public class HumanController : MonoBehaviour {
 		if (Physics.Raycast (ray, out hit, 1000, destinationLayer)) 
 		{
 			navMesh.SetDestination (hit.point);
+			anim.SetBool ("isMoving", true);
 
 			if (projInstance != null)
 				Destroy (projInstance);
@@ -76,6 +91,8 @@ public class HumanController : MonoBehaviour {
 			bulletInst.GetComponent<Rigidbody> ().AddForce (bulletInst.transform.forward * bulletSpeed, ForceMode.Impulse);
 			bulletInst.GetComponent<BulletBehaviour> ().human = GetComponent<HumanController> ();
 
+			source.PlayOneShot (shoot, 0.8f);
+
 			ammo--;
 			StartCoroutine (Reload ());
 			StartCoroutine (hud.UpdateArrows ());
@@ -85,6 +102,7 @@ public class HumanController : MonoBehaviour {
 	IEnumerator Reload ()
 	{
 		canShoot = false;
+		source.PlayOneShot (reload, 0.3f);
 		reloadSlider.gameObject.SetActive (true);
 		yield return new WaitForSeconds (reloadTime);
 		reloadSlider.gameObject.SetActive (false);

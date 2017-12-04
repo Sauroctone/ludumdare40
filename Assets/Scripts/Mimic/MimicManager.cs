@@ -9,6 +9,11 @@ public class MimicManager : MonoBehaviour {
 	public List<Transform> furnitureList = new List<Transform>();
 
 	public GameObject mimic;
+	public float newMass;
+
+	public AudioSource source;
+	RoundManager manager;
+	public PhysicMaterial slippery;
 
 	void Start()
 	{
@@ -28,11 +33,13 @@ public class MimicManager : MonoBehaviour {
 		{
 			furnitureList.Add (furniture.transform);
 		}
+
+		manager = GetComponent<RoundManager> ();
 	}
 
 	void Update()
 	{
-		if (availableList.Count > 0 && furnitureList.Count > 0) 
+		if (manager.round != Rounds.End && availableList.Count > 0 && furnitureList.Count > 0) 
 		{
 			for (int i = 0; i < availableList.Count; i++) 
 			{
@@ -41,12 +48,15 @@ public class MimicManager : MonoBehaviour {
 					print ("new mimic !");
 					int parentIndex = Mathf.RoundToInt (Random.Range (0, furnitureList.Count));
 					Transform parent = furnitureList [parentIndex];
+					parent.GetComponent<Collider> ().material = slippery;
+					parent.GetComponent<Rigidbody> ().mass = newMass;
 
 					GameObject newPlayer = GameObject.Instantiate (mimic, parent);
 					mimicList.Add (newPlayer);
 					MimicController mimicScript = newPlayer.GetComponent<MimicController> ();
 					mimicScript.horizontal = availableList [i].horizontal;
 					mimicScript.vertical = availableList [i].vertical;
+					//mimicScript.source = source;
 
 					availableList.RemoveAt (i);
 					furnitureList.RemoveAt (parentIndex);

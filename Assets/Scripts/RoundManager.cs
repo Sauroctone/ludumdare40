@@ -30,6 +30,10 @@ public class RoundManager : MonoBehaviour {
 	public Text restartText;
 	public Button humanButton;
 
+	public AudioSource source;
+	public AudioClip bell;
+	public AudioClip button;
+
 	void Start () 
 	{
 		round = Rounds.Startup;
@@ -46,6 +50,7 @@ public class RoundManager : MonoBehaviour {
 		StartCoroutine (Countdown ());
 		yield return new WaitForSeconds (3);
 		instructions.text = humanInitiate;
+		source.PlayOneShot (bell);
 		round = Rounds.Human;
 		humanButton.interactable = true;
 		//StartCoroutine (HumanRound ());
@@ -56,6 +61,7 @@ public class RoundManager : MonoBehaviour {
 	public void OnHumanClick()
 	{
 		StartCoroutine (HumanToMimicRound ());
+		source.PlayOneShot (button);
 	}
 
 	IEnumerator HumanToMimicRound()
@@ -79,6 +85,7 @@ public class RoundManager : MonoBehaviour {
 		StartCoroutine (Countdown ());
 		yield return new WaitForSeconds (3);
 		instructions.text = humanRound;
+		source.PlayOneShot (bell);
 		round = Rounds.Human;
 		humanButton.interactable = true;
 		//StartCoroutine (HumanRound ());
