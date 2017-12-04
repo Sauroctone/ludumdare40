@@ -8,6 +8,7 @@ public class HumanController : MonoBehaviour {
 
 	NavMeshAgent navMesh;
 	Vector3 targetPos;
+	Vector3 shootTarget;
 
 	public Transform bulletSpawner;
 	public GameObject bulletPrefab;
@@ -31,6 +32,10 @@ public class HumanController : MonoBehaviour {
 
 	public Animator anim;
 	int frameSincePath;
+
+	public float extraRotSpeed;
+
+	public LayerMask shootLayer;
 
 	void Start ()
 	{
@@ -57,6 +62,8 @@ public class HumanController : MonoBehaviour {
 
 		if (anim.GetBool ("isMoving") && frameSincePath < 1)
 			frameSincePath++;
+
+		ExtraRotation ();
 	}
 
 	void SetDestination()
@@ -76,23 +83,57 @@ public class HumanController : MonoBehaviour {
 		}
 	}
 
+	void ExtraRotation()
+	{
+		Vector3 lookrotation = navMesh.steeringTarget - transform.position;
+		if (lookrotation != Vector3.zero)
+			transform.rotation = Quaternion.Slerp (transform.rotation, Quaternion.LookRotation(lookrotation), extraRotSpeed * Time.deltaTime);
+	}
+
 	void Shoot()
 	{
 		Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 		RaycastHit hit;
 
-		if (Physics.Raycast (ray, out hit)) 
+		if (Physics.Raycast (ray, out hit, 1000, shootLayer)) 
 		{
+			//Stop movement
 			navMesh.ResetPath ();
-		
+
+			//Trigger anims
+			anim.SetTrigger ("shoots");
+			anim.SetBool ("isMoving", false);
+			frameSincePath = 0;
+
+			//Turn to target
 			transform.LookAt (new Vector3 (hit.point.x, transform.position.y, hit.point.z));
-				
+
+			//Instantiate bullet
 			bulletInst = GameObject.Instantiate (bulletPrefab, bulletSpawner.position, bulletSpawner.rotation) as GameObject;
-			bulletInst.GetComponent<Rigidbody> ().AddForce (bulletInst.transform.forward * bulletSpeed, ForceMode.Impulse);
+
+			if (hit.collider.tag == "Furniture") 
+			{
+				shootTarget = (hit.transform.position - transform.position);
+				shootTarget = new Vector3 (shootTarget.x, 0f, shootTarget.z).normalized;	 
+			}
+
+			else 
+			{
+				//Get target 
+				shootTarget = (hit.point - transform.position);
+				shootTarget = new Vector3 (shootTarget.x, 0f, shootTarget.z).normalized;
+			}
+
+			//Add force in direction of target
+			bulletInst.GetComponent<Rigidbody> ().AddForce (shootTarget * bulletSpeed, ForceMode.Impulse);
+
+			//assign humancontroller to bullet
 			bulletInst.GetComponent<BulletBehaviour> ().human = GetComponent<HumanController> ();
 
+			//Sound
 			source.PlayOneShot (shoot, 0.8f);
 
+			//Reload
 			ammo--;
 			StartCoroutine (Reload ());
 			StartCoroutine (hud.UpdateArrows ());

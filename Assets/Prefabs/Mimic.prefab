@@ -142,3 +142,4 @@ MonoBehaviour:
   rotSpeed: 7
   isLunging: 0
   bufferTime: 0.15
+  anim: {fileID: 0}

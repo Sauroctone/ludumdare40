@@ -47,16 +47,21 @@ public class BulletBehaviour : MonoBehaviour {
 
 				if (mimic != null) 
 				{
+					//Screenshake
 					ScreenShakeGenerator shake = Camera.main.GetComponent<ScreenShakeGenerator> ();
-					shake.ShakeScreen (0.2f, 0.2f);
+					shake.ShakeScreen (0.1f, 0.2f);
 
+					//Sound
 					source.PlayOneShot (hitMimic);
 
+					//Blood
 					GameObject.Instantiate (splatter, new Vector3 (mimic.position.x, 0.01f, mimic.position.z), mimic.rotation);
 
+					//Remove from list
 					MimicManager mimics = Camera.main.GetComponent<MimicManager> ();
 					mimics.mimicList.Remove (mimic.gameObject);
 
+					//Win condition
 					if (mimics.mimicList.Count == 0) 
 					{
 						RoundManager manager = Camera.main.GetComponent<RoundManager> ();
@@ -64,8 +69,10 @@ public class BulletBehaviour : MonoBehaviour {
 						manager.winner = Winner.Human;
 					}
 
+					//Kill mimic
 					mimic.GetComponent<MimicController> ().Die ();
 
+					//Gain arrow
 					if (human.ammo < 3) 
 					{
 						human.ammo++;
@@ -81,6 +88,7 @@ public class BulletBehaviour : MonoBehaviour {
 			Destroy (gameObject.GetComponent<BulletBehaviour> ());
 			Destroy (gameObject.GetComponent<Collider> ());
 			Destroy (gameObject.GetComponent<Rigidbody> ());
+			Destroy (gameObject.GetComponentInChildren<Animator>());
 		} 
 
 		else

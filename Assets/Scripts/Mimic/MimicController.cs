@@ -60,10 +60,10 @@ public class MimicController : MonoBehaviour {
 		if (direction != Vector3.zero) 
 		{
 			playerRot = Quaternion.LookRotation (direction);
+			playerRot = Quaternion.Euler (0, playerRot.eulerAngles.y, 0);
 		}
-			
-		transform.parent.rotation = Quaternion.Slerp (transform.parent.rotation, playerRot, rotSpeed * Time.deltaTime);
 
+		transform.parent.rotation = Quaternion.Slerp (transform.parent.rotation, playerRot, rotSpeed * Time.deltaTime);
 	}
 		
 	void FixedUpdate()

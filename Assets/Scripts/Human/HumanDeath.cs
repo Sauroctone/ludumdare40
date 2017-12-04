@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class HumanDeath : MonoBehaviour {
 
+	public GameObject particle;
+	public AudioSource source;
+	public AudioClip death;
+
 	void OnCollisionEnter (Collision col)
 	{
 		if (col.gameObject.tag == "Furniture") 
@@ -24,6 +28,8 @@ public class HumanDeath : MonoBehaviour {
 		RoundManager manager = Camera.main.GetComponent<RoundManager> ();
 		manager.round = Rounds.End;
 		manager.winner = Winner.Mimics;
+		Instantiate (particle, transform.position, particle.transform.rotation);
+		source.PlayOneShot (death);
 		Destroy (gameObject);
 	}
 }
