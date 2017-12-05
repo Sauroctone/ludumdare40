@@ -9,7 +9,7 @@ public class MimicController : MonoBehaviour {
 	float xAxis;
 	float zAxis;
 	Vector3 direction;
-	float speed;
+	public float speed;
 	public float moveSpeed;
 	public float lungeSpeed;
 	public float lungeTime;
@@ -22,18 +22,20 @@ public class MimicController : MonoBehaviour {
 	Quaternion playerRot;
 	public float rotSpeed;
 
-	bool isBuffering;
-	bool holdingDown;
-	bool tappedOnce;
-	public bool isLunging;
-
 	public float bufferTime;
+	bool singlePressed;
+	bool isBuffering;
+	bool pressedOnce;
+	public bool isLunging;
 
 	AudioSource source;
 	//public AudioClip lunge;
 
 	public Animator anim;
 	Collider col;
+
+	enum Inputs {Up, Down, Left, Right};
+	Inputs lastInput;
 
 	void Start ()
 	{
@@ -50,6 +52,7 @@ public class MimicController : MonoBehaviour {
 		if (!isLunging) 
 		{
 			GetIsometricInput ();
+
 			if (human != null)
 				CheckLungeInput ();
 
@@ -143,33 +146,123 @@ public class MimicController : MonoBehaviour {
 
 	void CheckLungeInput()
 	{
-		if (!isBuffering) 
-		{
-			if (Input.GetAxisRaw (vertical) > 0) 
-			{
-				holdingDown = true;
-				StartCoroutine (LungeBuffer ());
-			}
-		} 
+		//on checke si une unique touche d'input est pressée
 
-		else 
+		if (Input.GetAxisRaw (horizontal) != 0 && Input.GetAxisRaw (vertical) == 0
+		    || Input.GetAxisRaw (horizontal) == 0 && Input.GetAxisRaw (vertical) != 0) 
 		{
-			if (holdingDown && Input.GetAxisRaw (vertical) == 0) 
+			singlePressed = true;
+		}
+
+		else
+			singlePressed = false;
+
+
+		//Si une touche est pressée, sans buffer
+
+		if (singlePressed && !isBuffering) 
+		{
+			//On save l'input
+			if (Input.GetAxisRaw (horizontal) == 1)
+				lastInput = Inputs.Right;
+			if (Input.GetAxisRaw (horizontal) == -1)
+				lastInput = Inputs.Left;
+			if (Input.GetAxisRaw (vertical) == 1)
+				lastInput = Inputs.Up;
+			if (Input.GetAxisRaw (vertical) == -1)
+				lastInput = Inputs.Down;
+
+			pressedOnce = false;
+
+			//On lance le buffer
+			StartCoroutine(LungeBuffer());
+
+			//print ("new input : " + lastInput);
+		}
+
+		//Si le buffer est en cours mais que la touche n'a pas été relâchée
+
+		if (isBuffering && !pressedOnce) 
+		{
+			//On checke si la touche est relâchée
+
+			if (Input.GetAxisRaw (horizontal) == 0) 
 			{
-				holdingDown = false;
-				tappedOnce = true;
+				if (lastInput == Inputs.Right || lastInput == Inputs.Left) 
+				{
+					pressedOnce = true;
+					//print ("ready for second input");
+				}
+
 			}
 
-			if (tappedOnce && Input.GetAxisRaw (vertical) > 0) 
+			if (Input.GetAxisRaw (vertical) == 0) 
 			{
-				tappedOnce = false;
-				StopCoroutine (LungeBuffer());
-				StartCoroutine (Lunge ());
-				isLunging = true;
+				if (lastInput == Inputs.Up || lastInput == Inputs.Down) 
+				{
+					pressedOnce = true;
+					//print ("ready for second input");
+				}
 			}
 		}
+
+		//Si le buffer est en cours et que la touche a été relâchée
+
+		if (isBuffering && pressedOnce && singlePressed) 
+		{
+			//Si la même touche est pressée
+
+			if (Input.GetAxisRaw (horizontal) == 1 && lastInput == Inputs.Right
+			    || Input.GetAxisRaw (horizontal) == -1 && lastInput == Inputs.Left
+			    || Input.GetAxisRaw (vertical) == 1 && lastInput == Inputs.Up
+			    || Input.GetAxisRaw (vertical) == -1 && lastInput == Inputs.Down) 
+			{
+				//On lunge
+				StopCoroutine (LungeBuffer ());
+				StartCoroutine (Lunge ());
+				isBuffering = false;
+				pressedOnce = false;
+				//print ("second input : LUNGE");
+			} 
+
+			//Si c'est une autre touche
+
+			else 
+			{
+				//On save le nouvel input
+				if (Input.GetAxisRaw (horizontal) == 1)
+					lastInput = Inputs.Right;
+				if (Input.GetAxisRaw (horizontal) == -1)
+					lastInput = Inputs.Left;
+				if (Input.GetAxisRaw (vertical) == 1)
+					lastInput = Inputs.Up;
+				if (Input.GetAxisRaw (vertical) == -1)
+					lastInput = Inputs.Down;
+
+				pressedOnce = false;
+
+				//On arrête le buffer
+				StopCoroutine(LungeBuffer());
+
+				//On relance le buffer
+				StartCoroutine(LungeBuffer());
+
+				//print ("new input : " + lastInput);
+			}
+		}
+
+
 	}
 
+	IEnumerator LungeBuffer()
+	{
+		isBuffering = true;
+		//print ("buffering : " + isBuffering);
+		yield return new WaitForSeconds (bufferTime);
+		isBuffering = false;
+		//print ("buffering : " +  isBuffering);
+	}
+		
 	IEnumerator Lunge ()
 	{
 
@@ -195,14 +288,6 @@ public class MimicController : MonoBehaviour {
 		direction = Vector3.zero;
 		isLunging = false;
 
-	}
-
-	IEnumerator LungeBuffer ()
-	{
-		isBuffering = true;
-		yield return new WaitForSeconds (bufferTime);
-		isBuffering = false;
-		tappedOnce = false;
 	}
 
 	public void Die()

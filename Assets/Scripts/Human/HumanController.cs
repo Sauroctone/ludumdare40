@@ -37,6 +37,8 @@ public class HumanController : MonoBehaviour {
 
 	public LayerMask shootLayer;
 
+	public MimicManager mimics;
+
 	void Start ()
 	{
 		navMesh = GetComponent<NavMeshAgent> ();
@@ -135,6 +137,24 @@ public class HumanController : MonoBehaviour {
 
 			//Reload
 			ammo--;
+
+			if (ammo == 0) 
+			{
+				foreach (GameObject mimic in mimics.mimicList) 
+				{
+					MimicController mimicCont = mimic.GetComponent<MimicController> ();
+					mimicCont.moveSpeed = mimicCont.moveSpeed * 4;
+					mimicCont.lungeSpeed = mimicCont.lungeSpeed * 4;
+					mimicCont.speed = mimicCont.moveSpeed;
+				}
+
+				foreach (PlayerClass player in mimics.availableList)
+				{
+					player.moveSpeed = player.moveSpeed * 4;
+					player.lungeSpeed = player.lungeSpeed * 4;
+				}
+			}
+
 			StartCoroutine (Reload ());
 			StartCoroutine (hud.UpdateArrows ());
 		}

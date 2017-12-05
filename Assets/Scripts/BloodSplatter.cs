@@ -25,7 +25,7 @@ public class BloodSplatter : MonoBehaviour {
 		{
 			rend.material.SetFloat ("_Grow", _lerp);
 			_lerp += Time.deltaTime * lerpSpeed;
-			print (_lerp);
+//			print (_lerp);
 
 			yield return null;
 		}

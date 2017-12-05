@@ -134,12 +134,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   horizontal: 
   vertical: 
+  speed: 0
   moveSpeed: 0.5
   lungeSpeed: 5
   lungeTime: 0.1
   lungeRecovery: 1
   lerpMov: 0.1
   rotSpeed: 7
-  isLunging: 0
   bufferTime: 0.15
+  isLunging: 0
   anim: {fileID: 0}

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class BulletBehaviour : MonoBehaviour {
 
@@ -37,9 +38,9 @@ public class BulletBehaviour : MonoBehaviour {
 	{
 		if (col.gameObject.tag != "BottomWall") 
 		{
-			rb.isKinematic = true;
+			/*rb.isKinematic = true;
 			transform.parent = col.transform;
-			isFlying = false;
+			isFlying = false;*/
 
 			if (col.gameObject.tag == "Furniture") 
 			{
@@ -55,7 +56,7 @@ public class BulletBehaviour : MonoBehaviour {
 					source.PlayOneShot (hitMimic);
 
 					//Blood
-					GameObject.Instantiate (splatter, new Vector3 (mimic.position.x, 0.01f, mimic.position.z), mimic.rotation);
+					Instantiate (splatter, new Vector3 (mimic.position.x, 0.01f, mimic.position.z), mimic.rotation);
 
 					//Remove from list
 					MimicManager mimics = Camera.main.GetComponent<MimicManager> ();
@@ -81,17 +82,28 @@ public class BulletBehaviour : MonoBehaviour {
 					}
 				} 
 
-				else
+				else 
+				{
 					source.PlayOneShot (hitWood);
-			}
+					col.gameObject.GetComponent<NavMeshObstacle> ().enabled = false;
+					col.gameObject.GetComponent<Rigidbody> ().isKinematic = true;
+					col.collider.enabled = false;
 
-			Destroy (gameObject.GetComponent<BulletBehaviour> ());
-			Destroy (gameObject.GetComponent<Collider> ());
-			Destroy (gameObject.GetComponent<Rigidbody> ());
-			Destroy (gameObject.GetComponentInChildren<Animator>());
+					Transform brokenMesh = col.transform.Find("Mesh_Broken");
+					Transform mesh = col.transform.Find ("Mesh");
+					brokenMesh.gameObject.SetActive (true);
+					mesh.gameObject.SetActive (false);
+					Vector3 force = rb.velocity.normalized;
+					force.y = 0;
+					brokenMesh.GetComponent<Destructible> ().direction = force;
+
+					//Remove from list
+					MimicManager mimics = Camera.main.GetComponent<MimicManager> ();
+					mimics.furnitureList.Remove (col.transform);
+				}
+			}
 		} 
 
-		else
-			Destroy (gameObject);
+		Destroy (gameObject);
 	}
 }

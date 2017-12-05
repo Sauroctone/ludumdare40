@@ -14,6 +14,8 @@ public class RoundManager : MonoBehaviour {
 	public float mimicTime;
 	public float textTime;
 
+	bool firstHumanClick;
+
 	public string closeYourEyes;
 	public string until;
 	public string mimicReveal;
@@ -38,13 +40,17 @@ public class RoundManager : MonoBehaviour {
 	{
 		round = Rounds.Startup;
 		StartCoroutine (Startup ());
-		humanButton.interactable = false;
+		humanButton.interactable = true;
 	}
 	
 	IEnumerator Startup()
 	{
 		instructions.text = closeYourEyes + System.Environment.NewLine + until;
-		yield return new WaitForSeconds (4);
+		while (!firstHumanClick) 
+		{
+			yield return null;
+		}
+		humanButton.interactable = false;
 		instructions.text = mimicReveal;
 		yield return new WaitForSeconds (startupTime - 3);
 		StartCoroutine (Countdown ());
@@ -60,10 +66,14 @@ public class RoundManager : MonoBehaviour {
 
 	public void OnHumanClick()
 	{
-		StartCoroutine (HumanToMimicRound ());
+		if (round == Rounds.Startup)
+			firstHumanClick = true;
+		else
+			StartCoroutine (HumanToMimicRound ());
+
 		source.PlayOneShot (button);
 	}
-
+	
 	IEnumerator HumanToMimicRound()
 	{
 		//yield return new WaitForSeconds (humanTime - 3);

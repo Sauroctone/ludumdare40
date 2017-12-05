@@ -56,6 +56,8 @@ public class MimicManager : MonoBehaviour {
 					MimicController mimicScript = newPlayer.GetComponent<MimicController> ();
 					mimicScript.horizontal = availableList [i].horizontal;
 					mimicScript.vertical = availableList [i].vertical;
+					mimicScript.moveSpeed = availableList [i].moveSpeed;
+					mimicScript.lungeSpeed = availableList [i].lungeSpeed;
 					//mimicScript.source = source;
 
 					availableList.RemoveAt (i);
