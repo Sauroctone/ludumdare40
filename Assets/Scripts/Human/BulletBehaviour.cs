@@ -36,6 +36,8 @@ public class BulletBehaviour : MonoBehaviour {
 
 	void OnCollisionEnter(Collision col)
 	{
+		MimicManager mimics = Camera.main.GetComponent<MimicManager> ();
+
 		if (col.gameObject.tag != "BottomWall") 
 		{
 			/*rb.isKinematic = true;
@@ -59,7 +61,7 @@ public class BulletBehaviour : MonoBehaviour {
 					Instantiate (splatter, new Vector3 (mimic.position.x, 0.01f, mimic.position.z), mimic.rotation);
 
 					//Remove from list
-					MimicManager mimics = Camera.main.GetComponent<MimicManager> ();
+
 					mimics.mimicList.Remove (mimic.gameObject);
 
 					//Win condition
@@ -97,12 +99,28 @@ public class BulletBehaviour : MonoBehaviour {
 					force.y = 0;
 					brokenMesh.GetComponent<Destructible> ().direction = force;
 
-					//Remove from list
-					MimicManager mimics = Camera.main.GetComponent<MimicManager> ();
 					mimics.furnitureList.Remove (col.transform);
+
 				}
 			}
 		} 
+
+		if (human.ammo == 0) 
+		{
+			foreach (GameObject m in mimics.mimicList) 
+			{
+				MimicController mimicCont = m.GetComponent<MimicController> ();
+				mimicCont.moveSpeed = mimicCont.moveSpeed * 2;
+				mimicCont.lungeSpeed = mimicCont.lungeSpeed * 3;
+				mimicCont.speed = mimicCont.moveSpeed;
+			}
+
+			foreach (PlayerClass player in mimics.availableList)
+			{
+				player.moveSpeed = player.moveSpeed * 2;
+				player.lungeSpeed = player.lungeSpeed * 3;
+			}
+		}
 
 		Destroy (gameObject);
 	}
