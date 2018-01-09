@@ -36,6 +36,9 @@ public class RoundManager : MonoBehaviour {
 	public AudioClip bell;
 	public AudioClip button;
 
+	public Light spot;
+	public float spotLerp;
+
 	void Start () 
 	{
 		round = Rounds.Startup;
@@ -51,6 +54,7 @@ public class RoundManager : MonoBehaviour {
 			yield return null;
 		}
 		humanButton.interactable = false;
+		StartCoroutine(ReduceLight());
 		instructions.text = mimicReveal;
 		yield return new WaitForSeconds (startupTime - 3);
 		StartCoroutine (Countdown ());
@@ -59,6 +63,7 @@ public class RoundManager : MonoBehaviour {
 		source.PlayOneShot (bell);
 		round = Rounds.Human;
 		humanButton.interactable = true;
+		StartCoroutine(ExpandLight());
 		//StartCoroutine (HumanRound ());
 		yield return new WaitForSeconds (textTime);
 		instructions.text = "";
@@ -79,7 +84,8 @@ public class RoundManager : MonoBehaviour {
 		//yield return new WaitForSeconds (humanTime - 3);
 		//StartCoroutine (Countdown ());
 		//yield return new WaitForSeconds (3);
-	//	instructions.text = closeYourEyes;
+		//	instructions.text = closeYourEyes;
+		StartCoroutine(ReduceLight());
 		humanButton.interactable = false;
 		yield return new WaitForSeconds (1);
 		instructions.text = mimicRound;
@@ -98,9 +104,28 @@ public class RoundManager : MonoBehaviour {
 		source.PlayOneShot (bell);
 		round = Rounds.Human;
 		humanButton.interactable = true;
+		StartCoroutine(ExpandLight());
 		//StartCoroutine (HumanRound ());
 		yield return new WaitForSeconds (textTime);
 		instructions.text = "";
+	}
+
+	IEnumerator ExpandLight()
+	{
+		while (spot.spotAngle < 178)
+		{
+			spot.spotAngle = Mathf.Lerp(spot.spotAngle, 179, spotLerp);
+			yield return null;
+		}
+	}
+
+	IEnumerator ReduceLight()
+	{
+		while (spot.spotAngle > 45)
+		{
+			spot.spotAngle = Mathf.Lerp(spot.spotAngle, 44, spotLerp);
+			yield return null;
+		}
 	}
 
 	IEnumerator Countdown()
